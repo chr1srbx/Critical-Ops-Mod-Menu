@@ -54,31 +54,6 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void * reserved)
 }
 bool isHooked = false;
 
-void (*oldLogin)(std::uintptr_t instance, std::uintptr_t eventData);
-void Login(std::uintptr_t instance, std::uintptr_t eventData) {
-    if (instance != NULL && !isHooked) {
-        isHooked = true;
-
-        LOGE("-> Hooking swapbuffer..");
-        auto eglhandle = dlopen(OBFUSCATE("libunity.so"), RTLD_LAZY);
-        dlerror();
-        auto eglSwapBuffers = dlsym(eglhandle, OBFUSCATE("eglSwapBuffers"));
-        const char *dlsym_error = dlerror();
-        if (dlsym_error)
-        {
-            LOGE(OBFUSCATE("Cannot load symbol 'eglSwapBuffers': %s"), dlsym_error);
-        } else
-        {
-            hook(eglSwapBuffers, (void *) new_eglSwapBuffers, (void **) &old_eglSwapBuffers);
-        }
-    }
-    else if(instance != NULL)
-    {
-        LOGE("-> The login function has been called.");
-    }
-    oldLogin(instance, eventData);
-}
-
 void *hack_thread(void *)
 {
     using namespace BNM;
@@ -90,17 +65,29 @@ void *hack_thread(void *)
     Menu::Screen_get_width = (int (*)()) OBFUSCATE_BYNAME_METHOD("UnityEngine", "Screen", "get_width", 0);
     DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD03718), (void*) Menu::ApplyRecoil, (void**)&Menu::oldApplyRecoil);
     DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD03404), (void*) Menu::Inaccuaracy, (void**)&Menu::oldInaccuaracy);
-    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x8A45F0), (void*) Login, (void**)&oldLogin);
     Pointers::LoadPointers();
-    DetachIl2Cpp(); // remember to detach when you are done using bynamemodding functions
+    DetachIl2Cpp();
     return NULL;
 }
-
-
 
 __attribute__((constructor))
 void lib_main()
 {
+    auto eglhandle = dlopen(OBFUSCATE("libEGL.so"), RTLD_LAZY);
+    const char *dlopen_error = dlerror();
+    if (dlopen_error)
+    {
+        eglhandle = dlopen(OBFUSCATE("libunity.so"), RTLD_LAZY); // I have no idea if this works it was just to me that it would fix crashes so I did it really quickly
+    }
+    auto eglSwapBuffers = dlsym(eglhandle, OBFUSCATE("eglSwapBuffers"));
+    const char *dlsym_error = dlerror();
+    if (dlsym_error)
+    {
+        LOGE(OBFUSCATE("Cannot load symbol 'eglSwapBuffers': %s"), dlsym_error);
+    } else
+    {
+        hook(eglSwapBuffers, (void *) new_eglSwapBuffers, (void **) &old_eglSwapBuffers);
+    }
     pthread_t ptid;
     pthread_create(&ptid, NULL, hack_thread, NULL);
 }

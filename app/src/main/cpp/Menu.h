@@ -9,7 +9,6 @@ namespace Menu
     void (*oldInaccuaracy)(std::uintptr_t instance);
     void Inaccuaracy(std::uintptr_t instance) {
         if (instance != NULL && gravity) {
-            LOGE("I EXIST");
             std::uintptr_t chardata = *(std::uintptr_t*)(instance + 0x6C);
             float* gravity = (float*)(chardata + 0x50);
             LOGE("Gravity: %f", *gravity);
@@ -21,7 +20,6 @@ namespace Menu
     bool(*oldApplyRecoil)(std::uintptr_t instance);
     bool ApplyRecoil(std::uintptr_t instance){
         if(instance != NULL && recoil){
-            LOGE("RECOIL");
             return false;
         }
         return oldApplyRecoil(instance);
@@ -55,19 +53,10 @@ namespace Menu
         }
     }
 
-    int SHITTYACHEIGHT(){
-        return Screen_get_height();
-    }
-
-    int SHITTYACWIDTH(){
-        return Screen_get_width();
-    }
     void DrawImGui()
     {
         if (init && Screen_get_height)
         {
-            LOGE("Screen_height : %d", Screen_get_width());
-            LOGE("Screen_width : %d", Screen_get_height());
             ImGuiIO &io = ImGui::GetIO();
             static bool WantTextInputLast = false;
 //            if (io.WantTextInput && !WantTextInputLast)
