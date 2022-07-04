@@ -9,12 +9,26 @@ namespace Menu
     void (*oldInaccuaracy)(std::uintptr_t instance);
     void Inaccuaracy(std::uintptr_t instance) {
         if (instance != NULL && gravity) {
-            std::uintptr_t chardata = *(std::uintptr_t*)(instance + 0x6C);
+            /*std::uintptr_t chardata = *(std::uintptr_t*)(instance + 0x6C);
             float* gravity = (float*)(chardata + 0x50);
             LOGE("Gravity: %f", *gravity);
-            *gravity = 9.81f / 3;
+            *gravity = 9.81f / 3;*/
         }
         oldInaccuaracy(instance);
+    }
+
+    void (*oldupdateGraphics)(void* instance, std::uintptr_t v1);
+    void updateGraphics(void* instance, std::uintptr_t v1) {
+        if (instance != NULL) {
+            LOGE("updateGraphics has been called.");
+            std::uintptr_t profile = *reinterpret_cast<std::uintptr_t*>((uint64_t)instance + 0x14);
+
+            //int* screenScale = (int*)(profile + 0x24);
+            LOGE("Profile: %p", profile);
+
+            //*screenScale = 1.0;
+        }
+        oldupdateGraphics(instance, v1);
     }
 
     bool(*oldApplyRecoil)(std::uintptr_t instance);

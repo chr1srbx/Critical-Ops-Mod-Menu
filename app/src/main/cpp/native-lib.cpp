@@ -65,6 +65,7 @@ void *hack_thread(void *)
     Menu::Screen_get_width = (int (*)()) OBFUSCATE_BYNAME_METHOD("UnityEngine", "Screen", "get_width", 0);
     DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD03718), (void*) Menu::ApplyRecoil, (void**)&Menu::oldApplyRecoil);
     DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD03404), (void*) Menu::Inaccuaracy, (void**)&Menu::oldInaccuaracy);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x77AAA0), (void*) Menu::updateGraphics, (void**)&Menu::oldupdateGraphics);
     Pointers::LoadPointers();
     DetachIl2Cpp();
     return NULL;
@@ -77,7 +78,7 @@ void lib_main()
     const char *dlopen_error = dlerror();
     if (dlopen_error)
     {
-        eglhandle = dlopen(OBFUSCATE("libunity.so"), RTLD_LAZY); // I have no idea if this works it was just to me that it would fix crashes so I did it really quickly
+        eglhandle = dlopen(OBFUSCATE("libunity.so"), RTLD_LAZY);
     }
     auto eglSwapBuffers = dlsym(eglhandle, OBFUSCATE("eglSwapBuffers"));
     const char *dlsym_error = dlerror();
