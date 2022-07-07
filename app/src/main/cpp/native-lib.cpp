@@ -29,6 +29,7 @@
 #include "Misc/ImGuiStuff.h"
 #include "Menu.h"
 #include "Hooking/JNIHooks.h"
+#include "Memory/MemoryPatch.h"
 // the private version held by certain polarmodders has image loading and a lot more
 
 EGLBoolean (*old_eglSwapBuffers)(...);
@@ -64,8 +65,10 @@ void *hack_thread(void *)
     Menu::Screen_get_height = (int (*)()) OBFUSCATE_BYNAME_METHOD("UnityEngine", "Screen", "get_height",0);
     Menu::Screen_get_width = (int (*)()) OBFUSCATE_BYNAME_METHOD("UnityEngine", "Screen", "get_width", 0);
     DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD03718), (void*) Menu::ApplyRecoil, (void**)&Menu::oldApplyRecoil);
-    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD03404), (void*) Menu::Inaccuaracy, (void**)&Menu::oldInaccuaracy);
-    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x77AAA0), (void*) Menu::updateGraphics, (void**)&Menu::oldupdateGraphics);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x955CD4), (void*) Menu::get_GravityApproachFactor_hook, (void**)&Menu::get_GravityApproachFactor_old);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD0385C), (void*) Menu::ApplySpread, (void**)&Menu::oldApplySpread);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x57D670), (void*) Menu::RequestBanCreate, (void**)&Menu::oldRequestBanCreate);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x7DF8D4), (void*) Menu::FetchFollowedCharacterTeamIndex, (void**)&Menu::oldFetchFollowedCharacterTeamIndex);
     Pointers::LoadPointers();
     DetachIl2Cpp();
     return NULL;
