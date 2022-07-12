@@ -2,154 +2,20 @@
 #define MENU
 #include "Misc/Logging.h"
 #include "Misc/ESP.h"
+#include "Memory/MemoryPatch.h"
 
-namespace Mem
-{
-    std::uintptr_t Read(std::uintptr_t o1)
-    {
-        return *reinterpret_cast<std::uintptr_t*>(o1);
-    }
-}
-namespace fields
-{
-    namespace CharacterData
-    {
-        std::uint32_t aim = 0x8;
-        std::uint32_t transform = 0x20;
-        std::uint32_t m_moveInput = 0x40;
-        std::uint32_t state = 0x48;
-        std::uint32_t m_aimPunchY = 0x50;
-        std::uint32_t m_aimPunchX = 0x54;
-        std::uint32_t slowDown = 0x58;
-        std::uint32_t m_speedFactor = 0x5C;
-        std::uint32_t m_ticksRecovered = 0x60;
-        std::uint32_t m_firing = 0x64;
-        std::uint32_t m_weaponSettings = 0x68;
-        std::uint32_t m_characterSettings = 0x6C;
-        std::uint32_t m_wpn = 0x70;
-        std::uint32_t m_lastShotWpn = 0x74;
-        std::uint32_t m_armorMoveSpeedReductionRates = 0x78;
-    }
-    namespace AimData
-    {
-        std::uint32_t aimSpread = 0x0;
-        std::uint32_t rawSpread = 0x4;
-        std::uint32_t rawRecoil = 0x8;
-        std::uint32_t recoilY = 0xC;
-        std::uint32_t recoilX = 0x10;
-        std::uint32_t inaccuracy = 0x14;
-    }
-    namespace Grenade
-    {
-        std::uint32_t IDk__BackingField = 0x8;
-        std::uint32_t ThrowerIDk__BackingField = 0xC;
-        std::uint32_t Weaponk__BackingField = 0x10;
-        std::uint32_t ProxyIDk__BackingField = 0x14;
-        std::uint32_t Positionk__BackingField = 0x18;
-        std::uint32_t TeamIndexk__BackingField = 0x24;
-        std::uint32_t Actionk__BackingField = 0x28;
-        std::uint32_t HasExplodedk__BackingField = 0x2C;
-        std::uint32_t m_characterExposureValues = 0x30;
-    }
-    namespace Weapon
-    {
-        std::uint32_t SimPlayerIDk__BackingField = 0x8; //=
-        std::uint32_t Expirationk__BackingField = 0xC; //=
-        std::uint32_t AmmoInClipk__BackingField = 0x10; //=
-        std::uint32_t AmmoInInventoryk__BackingField = 0x14; //=
-        std::uint32_t m_ID = 0x18; //int
-        std::uint32_t m_skinID = 0x1C; //int
-        std::uint32_t m_carrier = 0x20; //Character
-        std::uint32_t m_shotTickData = 0x24; //ShotTickData
-        std::uint32_t m_weaponDefData = 0x28; //WeaponDefData
-        std::uint32_t m_position = 0x2C; //Vector3
-        std::uint32_t m_rotation = 0x38; //Vector3
-        std::uint32_t m_stop = 0x44; //bool
-        std::uint32_t m_velocity = 0x48; //Vector3
-        std::uint32_t m_angularVelocity = 0x54; //Vector3
-    }
-    namespace WeaponDefData
-    {
-        std::uint32_t Name = 0x8; //string
-        std::uint32_t ID = 0xC; //int
-        std::uint32_t LocalizationKey = 0x10; //string
-        std::uint32_t LocalizationGroup = 0x14; //string
-        std::uint32_t WeaponType = 0x18; //WeaponType
-        std::uint32_t WeaponSlot = 0x1C; //WeaponSlot
-        std::uint32_t WeaponCategory = 0x20; //WeaponCategory
-        std::uint32_t ReloadType = 0x24; //ReloadType
-        std::uint32_t CanBuy = 0x28; //bool
-        std::uint32_t BuyPrice = 0x2C; //int
-        std::uint32_t MoneyRewardMultiplier = 0x30; //int
-        std::uint32_t MaxDamage = 0x34; //float
-        std::uint32_t MinDamage = 0x38; //float
-        std::uint32_t Force = 0x3C; //float
-        std::uint32_t DropOffStartRange = 0x40; //float
-        std::uint32_t DropOffEndRange = 0x44; //float
-        std::uint32_t Range = 0x48; //float
-        std::uint32_t FireRate = 0x4C; //float
-        std::uint32_t Burst = 0x50; //int
-        std::uint32_t BurstSpread = 0x54; //float
-        std::uint32_t ClipSize = 0x58; //int
-        std::uint32_t ExtraClips = 0x5C; //int
-        std::uint32_t MaxClips = 0x60; //int
-        std::uint32_t WallPenetration = 0x64; //WallPenetration
-        std::uint32_t ArmorPenetration = 0x68; //ArmorPenetration
-        std::uint32_t ReloadTime = 0x6C; //float
-        std::uint32_t DeployTime = 0x70; //float
-        std::uint32_t PrepareTime = 0x74; //float
-        std::uint32_t DryfireRate = 0x78; //float
-        std::uint32_t ConsumesAmmo = 0x7C; //bool
-        std::uint32_t AimType = 0x80; //AimType
-        std::uint32_t AimFovIsVertical = 0x84; //bool
-        std::uint32_t AimFov = 0x88; //float
-        std::uint32_t AimViewFov = 0x8C; //float
-        std::uint32_t AimSpeed = 0x90; //float
-        std::uint32_t AimMuzzleEffectsScale = 0x94; //float
-        std::uint32_t AimAfterReload = 0x98; //bool
-        std::uint32_t MoveSpeedFactor = 0x9C; //float
-        std::uint32_t AimMoveSpeedFactor = 0xA0; //float
-        std::uint32_t Inaccuracy = 0xA4; //WeaponFactors
-        std::uint32_t InaccuracyWhenAiming = 0xA8; //WeaponFactors
-        std::uint32_t SpreadCurve = 0xAC; //Curve
-        std::uint32_t SpreadFactor = 0xB0; //float
-        std::uint32_t SpreadPerShot = 0xB4; //float
-        std::uint32_t SpreadRecover = 0xB8; //float
-        std::uint32_t RecoilCurveY = 0xBC; //Curve
-        std::uint32_t RecoilYFactor = 0xC0; //float
-        std::uint32_t RecoilCurveX = 0xC4; //Curve
-        std::uint32_t RecoilXFactor = 0xC8; //float
-        std::uint32_t RecoilPerShot = 0xCC; //float
-        std::uint32_t RecoilRecover = 0xD0; //float
-        std::uint32_t ShootingRecoverFactor = 0xD4; //float
-        std::uint32_t ShakeFactor = 0xD8; //float
-        std::uint32_t ReloadInsertTime = 0xDC; //float
-        std::uint32_t ReloadFinishTime = 0xE0; //float
-        std::uint32_t BurstFireShots = 0xE4; //int
-        std::uint32_t BurstFireCooldown = 0xE8; //float
-        std::uint32_t GrenadeType = 0xEC; //GrenadeType
-        std::uint32_t GrenadeStartTime = 0xF0; //float
-        std::uint32_t GrenadeThrowTime = 0xF4; //float
-        std::uint32_t GrenadeInstantiateTime = 0xF8; //float
-        std::uint32_t GrenadeExplodeTime = 0xFC; //float
-        std::uint32_t GrenadeLifeTime = 0x100; //float
-        std::uint32_t GrenadeThrowVelocity = 0x104; //float
-        std::uint32_t ExplodeOnImpact = 0x108; //bool
-        std::uint32_t ImpactExplosionAngle = 0x10C; //float
-        std::uint32_t ImpactExplosionSpeed = 0x110; //float
-        std::uint32_t GrenadeBounciness = 0x114; //float
-        std::uint32_t GrenadeFrictionFactor = 0x118; //float
-    }
-}
 namespace Menu
 {
     namespace options
     {
-        static bool recoil, gravity, spread, ammo_move, preparetime, shake;
-        static float firerate, aimfov, reloadtime, fov;
-        static int burstshots;
-
+        static bool recoil, firerateb, spread, ammo_move, preparetime, shake, retardbots, bomb, radar, wallbang, burstshots, aimpunch;
+        static float aimfov, reloadtime, fov, speed, fly;
+        static int firerate;
     }
+
+    struct GlobalPatches {
+        MemoryPatch bomb, wallbang, radar;
+    }gPatches;
 
     /*void (*oldupdateGraphics)(void* instance, std::uintptr_t v1);
     void updateGraphics(void* instance, std::uintptr_t v1) {
@@ -177,21 +43,6 @@ namespace Menu
         oldRequestBanCreate(instance, Username, Time, banMessage);
     }
 
-    void (*oldFetchFollowedCharacterTeamIndex)(void* instance);
-    void FetchFollowedCharacterTeamIndex(void* instance) {
-        if (instance != NULL) {
-            LOGE("FetchFollowedCharacterTeamIndex");
-            LOGE("TeamIndex (int): %d", (int*)((uint64_t)instance + 0x38));
-
-            int result = -1;
-
-            *(int*)((uint64_t)instance + 0x38) = -1;
-
-            LOGE("2 TeamIndex (int): %d", *(int*)((uint64_t)instance + 0x38));
-        }
-        oldFetchFollowedCharacterTeamIndex(instance);
-    }
-
     bool(*oldApplyRecoil)(std::uintptr_t instance);
     bool ApplyRecoil(std::uintptr_t instance){
         if(instance != NULL && options::recoil){
@@ -200,54 +51,80 @@ namespace Menu
         return oldApplyRecoil(instance);
     }
 
-    bool(*oldApplySpread)(std::uintptr_t instance);
-    bool ApplySpread(std::uintptr_t instance){
+    bool(*oldRecoverSpread)(std::uintptr_t instance);
+    bool RecoverSpread(std::uintptr_t instance){
         if(instance != NULL && options::spread){
             return false;
         }
-        return oldApplyRecoil(instance);
-    }
-    float (*get_GravityApproachFactor_old)(void *instance);
-    float get_GravityApproachFactor_hook(void* instance)
-    {
-        float ret = get_GravityApproachFactor_old(instance);
-        LOGE("CriticalOps MiddleMan [GRAVITYAPPROACHFACTOR]: %f", ret);
-        ret = ret * 2;
-        return ret;
+        return oldRecoverSpread(instance);
     }
 
-    void (*oldFire)(void* instance, std::uintptr_t wpn);
-    void Fire(void* instance, std::uintptr_t wpn){
-        if(instance != nullptr){
-            if(options::firerate != NULL)
-                *(float*) Mem::Read(wpn + fields::WeaponDefData::FireRate) = options::firerate;
-            if(options::aimfov != NULL)
-                *(float*) Mem::Read(wpn + fields::WeaponDefData::AimViewFov) = options::aimfov;
-            if(options::burstshots != NULL)
-                *(int*) Mem::Read(wpn + fields::WeaponDefData::BurstFireShots) = options::burstshots;
-            if(options::ammo_move)
-            {
-                options::ammo_move = false;
-                *(int*) Mem::Read(wpn + fields::WeaponDefData::ClipSize) = *(int*) Mem::Read(wpn + fields::WeaponDefData::ClipSize) * *(int*) Mem::Read(wpn + fields::WeaponDefData::ExtraClips);
-                *(int*) Mem::Read(wpn + fields::WeaponDefData::ExtraClips) = 0;
-                *(int*) Mem::Read(wpn + fields::WeaponDefData::MaxClips) = 0;
-            }
-
-            if(options::shake)
-                *(float*) Mem::Read(wpn + fields::WeaponDefData::ShakeFactor) = 0;
-
-            if(options::preparetime)
-                *(float*) Mem::Read(wpn + fields::WeaponDefData::PrepareTime) = 0;
-
-            if(options::reloadtime != NULL){
-                *(float*) Mem::Read(wpn + fields::WeaponDefData::ReloadTime) = options::reloadtime;
-                *(float*) Mem::Read(wpn + fields::WeaponDefData::ReloadFinishTime) = options::reloadtime;
-                *(float*) Mem::Read(wpn + fields::WeaponDefData::ReloadInsertTime) = options::reloadtime;
-            }
-
-            if(options::fov != NULL)
-                *(float*) Mem::Read(wpn + fields::WeaponDefData::AimFov) = options::fov;
+    bool(*oldApplyAimpunch)(std::uintptr_t instance);
+    bool ApplyAimpunch(std::uintptr_t instance){
+        if(instance != NULL && options::aimpunch){
+            return false;
         }
+        return oldApplyAimpunch(instance);
+    }
+
+    bool (*oldFire)(void* instance);
+    bool FireRate(void* instance){
+        if(instance != nullptr & options::firerate != NULL){
+            *(float*)((uint64_t) instance + 0x20) = 0;
+        }
+        return oldFire(instance);
+    }
+
+    bool(*oldBurstMoveNext)(std::uintptr_t instance);
+    bool BurstMoveNext(std::uintptr_t instance){
+        if(instance != NULL && options::burstshots){
+            *(int*)((uint64_t) instance + 0x24) = 30;
+        }
+        return oldBurstMoveNext(instance);
+    }
+
+    bool(*oldIsValidTarget)(std::uintptr_t instance);
+    bool IsValidTarget(std::uintptr_t instance){
+        if(instance != NULL && options::retardbots){
+             return false;
+        }
+        return oldIsValidTarget(instance);
+    }
+
+    float (*oldfieldOfView)(void* instance);
+    float fieldOfView(void* instance){
+        if(instance != nullptr & options::fov != NULL){
+            return options::fov;
+        }
+        return oldfieldOfView(instance);
+    }
+
+    bool(*oldWeaponUpdate)(std::uintptr_t instance);
+    bool WeaponUpdate(std::uintptr_t instance){
+        if(instance != NULL){
+            if(options::ammo_move){
+                *(int*)((uint64_t) instance + 0x34) = *(int*)((uint64_t) instance + 0x34) + *(int*)((uint64_t) instance + 0x38);
+                *(int*)((uint64_t) instance + 0x38) = 0;
+                options::ammo_move = false;
+            }
+        }
+        return oldWeaponUpdate(instance);
+    }
+
+    float (*oldCharacterMaxSpeed)(void* instance);
+    float CharacterMaxSpeed(void* instance){
+        if(instance != nullptr & options::speed != NULL){
+            return options::speed;
+        }
+        return oldCharacterMaxSpeed(instance);
+    }
+
+    float (*oldget_height)(void* instance);
+    float get_height(void* instance){
+        if(instance != nullptr & options::fly != NULL){
+            return options::fly;
+        }
+        return oldget_height(instance);
     }
 
     int (*Screen_get_height)();
@@ -261,35 +138,59 @@ namespace Menu
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            ImGui::Begin("Misako - Critical Ops 1.33.0f1870 - chr1s#0002 - whozkiko#6046 - discord.gg/misako");
+            ImGui::Begin("Misako - Critical Ops 1.33.0f1870 - chr1s#0002 - discord.gg/misako");
             if (ImGui::CollapsingHeader("Weapons Mods"))
             {
                   ImGui::Checkbox("No Recoil", &options::recoil);
                   ImGui::SameLine();
                   ImGui::Checkbox("No Spread", &options::spread);
                   ImGui::SameLine();
-                  ImGui::Checkbox("No Shake", &options::shake);
-                  ImGui::SameLine();
                   ImGui::Checkbox("No Equip Time", &options::preparetime);
-                  ImGui::SliderFloat("Reload Time", &options::reloadtime, 0.0f, 60.0f);
-                  ImGui::SliderFloat("FireRate", &options::firerate, 0.0f, 60.0f);
-                  ImGui::SliderFloat("FOV Scope", &options::aimfov, 0.0f, 360.0f);
-                  ImGui::SliderInt("Burst Shots in 1 Fire", &options::burstshots, 0, 120);
+                  ImGui::SliderInt("FireRate", &options::firerate, 0, 60);
+                  ImGui::Checkbox("Wall-bang", &options::wallbang);
+                  ImGui::Checkbox("Burst Shots in 1 Fire", &options::burstshots);
                   if(ImGui::Button("No Reload"))
                   {
                       options::ammo_move = true;
                   }
+                if(options::wallbang){
+                    gPatches.wallbang.Modify();
+                }
+                else{
+                    gPatches.wallbang.Restore();
+                }
             }
             if (ImGui::CollapsingHeader("Player Mods"))
             {
+                ImGui::SliderFloat("Speed", &options::speed, 0.0f, 30.0f);
+                ImGui::SliderFloat("Fly", &options::fly, 0.0f, 20.0f);
 
             }
             if (ImGui::CollapsingHeader("Visual Mods"))
             {
                 ImGui::SliderFloat("FOV", &options::fov, 0.0f, 360.0f);
+                ImGui::SameLine();
+                ImGui::Checkbox("No Aim-Punch", &options::aimpunch);
+                ImGui::SameLine();
+                ImGui::Checkbox("Radar", &options::radar);
+
+                if(options::radar){
+                    gPatches.radar.Modify();
+                }
+                else{
+                    gPatches.radar.Restore();
+                }
             }
             if (ImGui::CollapsingHeader("Misc Mods")){
-
+                ImGui::Checkbox("Dumb Bots", &options::retardbots);
+                ImGui::SameLine();
+                ImGui::Checkbox("No Smoke/Flash/Grenade", &options::bomb);
+                if(options::bomb){
+                    gPatches.bomb.Modify();
+                }
+                else{
+                    gPatches.bomb.Restore();
+                }
             }
             ImGui::End();
         }

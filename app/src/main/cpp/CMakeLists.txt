@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 add_library(
-             native-lib
+             unityhandler
              SHARED
              native-lib.cpp
              ImGui/imgui.cpp
@@ -64,7 +64,7 @@ endif (${ANDROID_PLATFORM_LEVEL} LESS 12)
 
 
 target_link_libraries(
-        native-lib
+        unityhandler
         ${LZ_LIB}
         ${DOBBY_LIB}
         ${OPENGL_LIB}

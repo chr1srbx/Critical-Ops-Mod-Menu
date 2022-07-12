@@ -55,6 +55,14 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void * reserved)
 }
 bool isHooked = false;
 
+
+
+void Patches(){
+    Menu::gPatches.radar = MemoryPatch::createWithHex("libil2cpp.so", 0x7DEFF0, "03 00 A0 E3 1E FF 2F E1");
+    Menu::gPatches.wallbang = MemoryPatch::createWithHex("libil2cpp.so", 0x618BA0, "00 00 A0 E3 1E FF 2F E1");
+    Menu::gPatches.bomb = MemoryPatch::createWithHex("libil2cpp.so", 0x77F2E8, "00 00 A0 E3 1E FF 2F E1");
+}
+
 void *hack_thread(void *)
 {
     using namespace BNM;
@@ -65,11 +73,17 @@ void *hack_thread(void *)
     Menu::Screen_get_height = (int (*)()) OBFUSCATE_BYNAME_METHOD("UnityEngine", "Screen", "get_height",0);
     Menu::Screen_get_width = (int (*)()) OBFUSCATE_BYNAME_METHOD("UnityEngine", "Screen", "get_width", 0);
     DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD03718), (void*) Menu::ApplyRecoil, (void**)&Menu::oldApplyRecoil);
-    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x955CD4), (void*) Menu::get_GravityApproachFactor_hook, (void**)&Menu::get_GravityApproachFactor_old);
-    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD0385C), (void*) Menu::ApplySpread, (void**)&Menu::oldApplySpread);
-    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x57D670), (void*) Menu::RequestBanCreate, (void**)&Menu::oldRequestBanCreate);
-    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x7DF8D4), (void*) Menu::FetchFollowedCharacterTeamIndex, (void**)&Menu::oldFetchFollowedCharacterTeamIndex);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD0385C), (void*) Menu::RecoverSpread, (void**)&Menu::oldRecoverSpread);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xBD1098), (void*) Menu::FireRate, (void**)&Menu::oldFire);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xBD0900), (void*) Menu::WeaponUpdate, (void**)&Menu::oldWeaponUpdate);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xBD1098), (void*) Menu::BurstMoveNext, (void**)&Menu::oldBurstMoveNext);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x11DB238), (void*) Menu::fieldOfView, (void**)&Menu::oldfieldOfView);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x63B80C), (void*) Menu::IsValidTarget, (void**)&Menu::oldIsValidTarget);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD03230), (void*) Menu::CharacterMaxSpeed, (void**)&Menu::oldCharacterMaxSpeed);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD03520), (void*) Menu::ApplyAimpunch, (void**)&Menu::oldApplyAimpunch);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x1DB2328), (void*) Menu::get_height, (void**)&Menu::oldget_height);
     Pointers::LoadPointers();
+    Patches();
     DetachIl2Cpp();
     return NULL;
 }
