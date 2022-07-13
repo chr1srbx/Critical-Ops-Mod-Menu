@@ -31,6 +31,150 @@ namespace Menu
         oldupdateGraphics(instance, v1);
     }*/
 
+
+    struct Vec3
+    {
+        float x;
+        float y;
+        float z;
+    };
+
+    Vec3(*getTransform)(void* ptr);
+    void* (*getLocalPlayer)(void* ptr);
+//getTransform = (Vec3(*)(void*))getAbsoluteAddress(targetLibName, 0x0FF5E7);
+//getLocalPlayer = (void*(*)(void*))getAbsoluteAddress(targetLibName, 0x0FF5E7);
+
+    struct Ent
+    {
+        void* object{0};
+        int health{0};
+        int team{0};
+        bool firing{0};
+        bool initialized{0};
+        Vec3 origin{0,0,0};
+
+        // Check if Ent is local
+        bool isLocal{ 0 };
+    };
+
+    class EntManager
+    {
+    public:
+        Ent entList[32]{0};
+
+        Ent localCharacter{ 0 };
+
+        void Update(void* object)
+        {
+            bool present = 0;
+            bool isLocal = 0;
+            int entElement = -1;
+
+            // Get the local character
+            if ((*(void**)((uint64_t)object + 0x90) == getLocalPlayer(*(void**)((uint64_t)object + 0x38))))
+            {
+                localCharacter.object = object;
+                isLocal = 1;
+            }
+
+
+
+            // Check if ent is in the list and find its element position
+            for (int i = 0; i < 32; i++)
+            {
+                if (entList[i].object != object) continue;
+                present = 1;
+                entElement = i;
+            }
+
+            // If not add them to the list
+            if (!present) entElement = Add(object);
+
+            // Update its attributes
+            if (entElement != -1)
+            {
+                //std::cout << "stuff updated!!\n";
+                entList[entElement].health = getHealth(object);
+                entList[entElement].team = getTeam(object);
+                entList[entElement].firing = getFiring(object);
+                entList[entElement].initialized = getInitialized(object);
+                entList[entElement].origin = getOrigin(object);
+                entList[entElement].isLocal = isLocal;
+            }
+        }
+        int Add(void* object)
+        {
+            for (int i = 0; i < 32; i++)
+            {
+                if (entList[i].object != nullptr) continue;
+
+                entList[i].object = object;
+                return i;
+            }
+        }
+        void Remove(void* object)
+        {
+            for (int i = 0; i < 32; i++)
+            {
+                if (entList[i].object != object || entList[i].object == nullptr) continue;
+
+                // Shift the array point by 1,
+                for (int j = 0; j < 32; j++)
+                {
+                    // Overflow protection
+                    if ((i + j) > 31) continue;
+
+                    // Checks if we are on the last one, and if so sets it to 0;
+                    if ((i + j) == 31) entList[i + j].object == nullptr;
+
+                    // Moves down the object to basically remove it
+                    entList[i + j].object = entList[i + j + 1].object;
+                }
+
+            }
+        }
+        int getHealth(void* object)
+        {
+            return *(int*)((uint64_t)object + 0xC8);
+        }
+        int getTeam(void* object)
+        {
+            void* player = *(void**)((uint64_t)object + 0x90);
+            void* teamBoxedVal = *(void**)((uint64_t)player + 0x88);
+            return (int)*(byte*)((uint64_t)teamBoxedVal + 0x18); // was 0x18 in the old source no idea abt this at all
+        }
+        bool getFiring(void* object)
+        {
+            void* charData = *(void**)((uint64_t)object + 0x98);
+            return *(bool*)((uint64_t)charData + 0x6C);
+        }
+        bool getInitialized(void* object)
+        {
+            return *(bool*)((uint64_t)object + 0xE8);
+        }
+        Vec3 getOrigin(void* object)
+        {
+            return getTransform(*(void**)((uint64_t)object + 0x70));
+        }
+        Vec3 getBonePos(void* object, int bone)
+        {
+            void* bodyPartsArray = *(void**)((uint64_t)object + 0x78);
+
+            void* wantedBodyPart = nullptr;
+
+            for (int i = 0; i < 10; i++)
+            {
+                if (*(int*)(((uint64_t)bodyPartsArray + i) + 0x18) != bone) continue;
+                wantedBodyPart = (void*)((uint64_t)bodyPartsArray + i);
+            }
+
+            void* hitsphere = *(void**)((uint64_t)wantedBodyPart + 0x20);
+            return *(Vec3*)((uint64_t)hitsphere + 0x18);
+        }
+    };
+
+
+
     void (*oldRequestBanCreate)(void* instance, const char* Username, int Time, const char* banMessage);
     void RequestBanCreate(void* instance, const char* Username, int Time, const char* banMessage) {
         if (instance != NULL) {
