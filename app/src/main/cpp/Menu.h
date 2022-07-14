@@ -70,7 +70,7 @@ namespace Menu
             bool isLocal = 0;
             int entElement = -1;
 
-            // Get the local character
+            // Get the local character sus lol
             if ((*(void**)((uint64_t)object + 0x90) == getLocalPlayer(*(void**)((uint64_t)object + 0x38))))
             {
                 localCharacter.object = object;
