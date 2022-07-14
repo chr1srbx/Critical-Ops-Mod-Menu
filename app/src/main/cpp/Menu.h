@@ -75,6 +75,7 @@ namespace Menu
             {
                 localCharacter.object = object;
                 isLocal = 1;
+                //comment here
             }
 
 
