@@ -9,7 +9,7 @@ namespace Menu
     namespace options
     {
         static bool recoil, firerateb, spread, ammo_move, preparetime, shake, retardbots, bomb, radar, wallbang, burstshots, aimpunch;
-        static float aimfov, reloadtime, fov, speed, fly;
+        static float aimfov, reloadtime, fov, speed, fly, anglex, angley;
         static int firerate;
     }
 
@@ -32,6 +32,7 @@ namespace Menu
     }*/
 
 
+
     struct Vec3
     {
         float x;
@@ -39,10 +40,19 @@ namespace Menu
         float z;
     };
 
+    struct Vec2
+    {
+        float x;
+        float y;
+    };
+
     Vec3(*getTransform)(void* ptr);
     void* (*getLocalPlayer)(void* ptr);
-//getTransform = (Vec3(*)(void*))getAbsoluteAddress(targetLibName, 0x0FF5E7);
-//getLocalPlayer = (void*(*)(void*))getAbsoluteAddress(targetLibName, 0x0FF5E7);
+    void LoadPointers()
+    {
+        getTransform = (Vec3(*)(void*))getAbsoluteAddress("libil2cpp.so", 0x14CF704);
+        getLocalPlayer = (void*(*)(void*))getAbsoluteAddress("libil2cpp.so", 0x60E980);
+    }
 
     struct Ent
     {
@@ -71,7 +81,7 @@ namespace Menu
             int entElement = -1;
 
             // Get the local character
-            if ((*(void**)((uint64_t)object + 0x90) == getLocalPlayer(*(void**)((uint64_t)object + 0x38))))
+            if ((*(void**)((uint64_t)object + 0x90) == Pointers::getLocalPlayer(*(void**)((uint64_t)object + 0x38))))
             {
                 localCharacter.object = object;
                 isLocal = 1;
@@ -101,6 +111,7 @@ namespace Menu
                 entList[entElement].initialized = getInitialized(object);
                 entList[entElement].origin = getOrigin(object);
                 entList[entElement].isLocal = isLocal;
+                LOGE("Health : %d", entList[entElement].health);
             }
         }
         int Add(void* object)
@@ -173,8 +184,38 @@ namespace Menu
             return *(Vec3*)((uint64_t)hitsphere + 0x18);
         }
     };
+    EntManager entManager;
+    void(*originalGameplayUpdate)(void*, float deltatime);
+    void hookedGameplayUpdate(void* object, float deltatime)
+    {
+        if(object != nullptr) {
+            LOGE("Update Called!");
+            entManager.Update(object);
+            return originalGameplayUpdate(object, deltatime);
+        }
+    }
 
+    void(*originalDestroy)(void*);
+    void Destroy(void* object)
+    {
+        if(object != nullptr){
+            LOGE("Destroy called!");
+            entManager.Remove(object);
+            return originalDestroy(object);
+        }
+    }
 
+    void(*originalSetRotation)(void*, Vec2 angle);
+    void SetRotation(void* object, Vec2 angle)
+    {
+        if(object != nullptr){
+            angle.x = options::anglex;
+            angle.y = options::angley;
+            LOGE("X : %f", angle.x);
+            LOGE("Y : %f", angle.y);
+        }
+        return originalSetRotation(object, angle);
+    }
 
     void (*oldRequestBanCreate)(void* instance, const char* Username, int Time, const char* banMessage);
     void RequestBanCreate(void* instance, const char* Username, int Time, const char* banMessage) {
@@ -309,7 +350,8 @@ namespace Menu
             {
                 ImGui::SliderFloat("Speed", &options::speed, 0.0f, 30.0f);
                 ImGui::SliderFloat("Fly", &options::fly, 0.0f, 20.0f);
-
+                ImGui::SliderFloat("Angle X", &options::anglex, -360.0f, 360.0f);
+                ImGui::SliderFloat("Angle Y", &options::anglex, -180.0f, 180.0f);
             }
             if (ImGui::CollapsingHeader("Visual Mods"))
             {

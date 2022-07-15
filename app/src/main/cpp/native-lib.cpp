@@ -82,7 +82,11 @@ void *hack_thread(void *)
     DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD03230), (void*) Menu::CharacterMaxSpeed, (void**)&Menu::oldCharacterMaxSpeed);
     DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0xD03520), (void*) Menu::ApplyAimpunch, (void**)&Menu::oldApplyAimpunch);
     DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x1DB2328), (void*) Menu::get_height, (void**)&Menu::oldget_height);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x800230), (void*) Menu::hookedGameplayUpdate, (void**)&Menu::originalGameplayUpdate);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x7FDF1C), (void*) Menu::Destroy, (void**)&Menu::originalDestroy);
+    DobbyHook((void*)getAbsoluteAddress("libil2cpp.so", 0x7FBEE8), (void*) Menu::SetRotation, (void**)&Menu::originalSetRotation);
     Pointers::LoadPointers();
+    Menu::LoadPointers();
     Patches();
     DetachIl2Cpp();
     return NULL;
