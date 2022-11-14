@@ -2,7 +2,7 @@
 
 Mod Menu built using **[PolarImGui](https://github.com/Polarmods/PolarImGui)** 
  
-Includes a poor memcheck bypass, and a POC Esp, aswell as some simple mods.
+Includes a poor memcheck bypass, and a PoC Esp, aswell as some simple mods.
 
 Use Lucky Patcher to bypass the signature check.
 
